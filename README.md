@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Swasthya AI - Frontend
 
 A modern React + TypeScript + Tailwind CSS frontend application for the Swasthya AI healthcare platform.
@@ -202,3 +203,6 @@ This project is part of the Swasthya AI platform.
 ## 📞 Support
 
 For issues or questions, please contact the development team.
+=======
+# Swasthya-AI-
+>>>>>>> d1b70c2c9a1bef49be78714e32032d0f48c1f906
