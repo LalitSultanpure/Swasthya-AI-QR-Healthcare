@@ -30,27 +30,39 @@ async function startServer() {
         await client.connect();
         db = client.db('swasthya'); // Database name
         console.log('MongoDB se successfully connect ho gaya.');
-
-        // Routes ko setup karein
-        const patientRoutes = require('./routes/patients')(db);
-        const authRoutes = require('./routes/auth')(db);
-        const adminRoutes = require('./routes/admin')(db);
-        const doctorRoutes = require('./routes/doctors')(db);
-        const appointmentRoutes = require('./routes/appointments')(db);
-
-        // API routes ko mount karein
-        app.use('/api', authRoutes); // Handles /api/register and /api/login
-        app.use('/api/patients', patientRoutes);
-        app.use('/api/admin', adminRoutes);
-        app.use('/api/doctors', doctorRoutes);
-        app.use('/api/appointments', appointmentRoutes);
-
-        app.listen(port, '0.0.0.0', () => {
-            console.log(`Backend server http://localhost:${port} par chal raha hai`);
-        });
     } catch (err) {
         console.error("\nMongoDB connection error. Make sure the MongoDB server is running on your computer.", err.message);
+        process.exit(1); // Connection fail hone par process ko exit karein
     }
+
+    // Routes ko setup karein
+    const patientRoutes = require('./routes/patients')(db);
+    const authRoutes = require('./routes/auth')(db);
+    const adminRoutes = require('./routes/admin')(db);
+    const doctorRoutes = require('./routes/doctors')(db);
+    const appointmentRoutes = require('./routes/appointments')(db);
+
+    // API routes ko mount karein
+    app.use('/api', authRoutes); // Handles /api/register and /api/login
+    app.use('/api/patients', patientRoutes);
+    app.use('/api/admin', adminRoutes);
+    app.use('/api/doctors', doctorRoutes);
+    app.use('/api/appointments', appointmentRoutes);
+
+    const server = app.listen(port, '0.0.0.0', () => {
+        console.log(`Backend server http://localhost:${port} par chal raha hai`);
+    });
+
+    // Graceful Shutdown: Jab server band ho to DB connection close karein
+    process.on('SIGINT', async() => {
+        console.log('\nServer band ho raha hai...');
+        await client.close();
+        console.log('MongoDB connection band ho gaya.');
+        server.close(() => {
+            console.log('Server successfully band ho gaya.');
+            process.exit(0);
+        });
+    });
 }
 
 startServer();
